@@ -1,20 +1,22 @@
-let coin : @wasm4.Sprite = @wasm4.sprite(
-  b"\x00\xa0\x02\x00\x0e\xf0\x36\x5c\xd6\x57\xd5\x57\x35\x5c\x0f\xf0",
-)
-
-//let random:@random.Rand = @random.Rand::new()
-
 pub struct Block {
   mut width : Int
   mut height : Int
   mut x : Int
   mut y : Int
   mut color : Color
+  mut event_block : String
 }
 
 pub fn Block::new() -> Block {
-  { width: 30, height: 70, x: 0, y: 20, color: Color::new() }
+  { width: 30, 
+  height: 70, 
+  x: 0, 
+  y: 20, 
+  color: Color::new(), 
+  event_block : "None"
+  }
 }
+
 pub struct Ball {
   mut width : Int
   mut height : Int
@@ -24,7 +26,7 @@ pub struct Ball {
 }
 
 pub fn Ball::new() -> Ball {
-  { width: 30, height: 30, x: 30, y: 100, color: Color::new() }
+  { width: 25, height: 25, x: 19, y: 100, color: Color::new() }
 }
 
 pub struct Game {
@@ -32,7 +34,7 @@ pub struct Game {
   mut ball : Ball
   mut frame_count : Int
   mut prev_gamepad : @wasm4.GamePad
-  mut coin : UInt
+  mut coin : Int
   mut time : UInt
   mut delay : UInt
   mut counter : UInt
@@ -48,7 +50,7 @@ pub fn Game::new() -> Game {
     coin: 0,
     time: 0,
     delay: 0,
-    counter: 60,
+    counter: 65,
     counterFlag: false,
   }
 }
@@ -57,18 +59,20 @@ pub fn input(self : Game) -> Unit {
   let gamepad = @wasm4.get_gamepad()
   if game.counterFlag {
     game.counter -= 1
-    @wasm4.trace("\{self.counter}")
     animeBlock(self)
     animeBall(self)
   }
-
   if game.counter == 0 {
-    self.block[0].changeColor_random()
-    self.block[1].changeColor_random()
-    self.block[2].changeColor_random()
-    game.counter = 60
+    for i in [0, 1, 2] {
+      self.block[i].changeColor_random()
+      self.block[i].event_block = identifyEvent(getEvent())
+    @wasm4.trace("\{self.time}")
+
+    }
+
+    game.counter = 65
     game.counterFlag = false
-    game.ball.width = 30
+    game.ball.x = 19
     if game.block[0].color.palette == game.block[1].color.palette {
       if game.block[1].color.palette == game.block[2].color.palette {
         winwin()
@@ -77,31 +81,16 @@ pub fn input(self : Game) -> Unit {
       nothing()
     }
   }
-  //@wasm4.trace("getpad: Change=\{gamepad.button_1}, =\{gamepad.button_1}, Change=\{gamepad.button_1}, Change=\{gamepad.button_1}, Change=\{gamepad.button_1}")
   if gamepad != self.prev_gamepad {
-    if gamepad.button_1 {
+    if gamepad.button_1 && game.coin > 0 && game.counterFlag == false {
+      game.coin -= 1
       game.counterFlag = true
-      game.coin -=1
     }
   }
-  self.prev_gamepad = gamepad 
+  self.prev_gamepad = gamepad
 }
 
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
+fn gameOver() -> Unit {
+  @wasm4.text("GAME OVER", 44, 140)
+  @wasm4.text("press R to restart", 8, 150)
+}

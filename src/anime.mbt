@@ -18,8 +18,8 @@ pub fn animeBlock(self:Game) -> Unit{
 }
 
 pub fn animeBall(self:Game) -> Unit{
-  if game.counter >50 && game.counter < 61 {
-    self.ball.width += 9 
+  if game.counter >50 && game.counter < 66 {
+    self.ball.x += 7
   }
   
 }
