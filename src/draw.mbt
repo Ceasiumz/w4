@@ -4,19 +4,14 @@ struct Position {
 }
 
 struct Color {
-  mut index : UInt
   mut palette : UInt
 }
 
 pub fn Color::new() -> Color {
-  { index: 1, palette: 2 }
+  {  palette: 2 }
 }
 
 let randomer : @random.Rand = @random.Rand::new()
-
-pub fn Color::newRandom() -> Color {
-  { index: randomer.uint(), palette: 2 }
-}
 
 let inipos : Position = { x: 0, y: 0 }
 
@@ -25,6 +20,7 @@ fn draw(self : Game) -> Unit {
   drawBall(self)
   drawCoin(self)
   drawUI()
+  drawProgressBar(self)
 }
 
 fn drawBlock(self : Game) -> Unit {
@@ -48,18 +44,42 @@ fn drawBlock(self : Game) -> Unit {
 
 fn drawSprite(self:Game, blockindex : Int) -> Unit {
   @wasm4.set_draw_colors(1)
-  let eventName= self.block[blockindex].event_block
-  match eventName {
+  match self.block[blockindex].event_block {
     "None" => return
-    "Sun" => @wasm4.blit(sun_sprite, self.block[blockindex].x+3, 43, SunWidth, SunHeight, { one_bit_per_pixel: true, flip_x: false, flip_y: false, rotate: false })
-    "Moon" => @wasm4.blit(moon_sprite, self.block[blockindex].x+3, 43, MoonWidth, MoonHeight, { one_bit_per_pixel: true, flip_x: false, flip_y: false, rotate: false })
+    "Sun" => {
+      self.block[blockindex].sprite_block = 
+      { x: self.block[blockindex].x+3, y: 43, sprite:sun_sprite }
+      @wasm4.blit(self.block[blockindex].sprite_block.sprite, 
+      self.block[blockindex].sprite_block.x, 
+      self.block[blockindex].sprite_block.y,
+      SunWidth, SunHeight, 
+      { one_bit_per_pixel: true, flip_x: false, flip_y: false, rotate: false })
+    }  
+    "Moon" => {
+      self.block[blockindex].sprite_block = 
+      { x: self.block[blockindex].x+3, y: 43, sprite:moon_sprite }
+      @wasm4.blit(self.block[blockindex].sprite_block.sprite, 
+      self.block[blockindex].sprite_block.x, 
+      self.block[blockindex].sprite_block.y ,
+      MoonWidth, MoonHeight, 
+      { one_bit_per_pixel: true, flip_x: false, flip_y: false, rotate: false })
+    }
     _ => return
   }
 }
 
+
+
 fn drawBall(self : Game) -> Unit {
   @wasm4.set_draw_colors(3)
   @wasm4.oval(self.ball.x, self.ball.y, self.ball.width, self.ball.height)
+}
+
+fn drawProgressBar(self : Game) -> Unit {
+  @wasm4.set_draw_colors(3)
+  @wasm4.text("Events", 90, 120)
+  @wasm4.text("Moons:\{event.moonAmount} Suns:\{event.sunAmount}", 35, 130)
+  @wasm4.rect(self.pbar.x, self.pbar.y, self.pbar.width, self.pbar.height)
 }
 
 fn drawCoin(self : Game) -> Unit {
@@ -73,8 +93,6 @@ fn drawCoin(self : Game) -> Unit {
     { one_bit_per_pixel: false, flip_x: false, flip_y: false, rotate: false },
   )
 }
-
-
 
 fn drawUI() -> Unit {
   @wasm4.text("G a c h a", 44, 6)

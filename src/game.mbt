@@ -5,6 +5,7 @@ pub struct Block {
   mut y : Int
   mut color : Color
   mut event_block : String
+  mut sprite_block : MoveSprite
 }
 
 pub fn Block::new() -> Block {
@@ -13,7 +14,8 @@ pub fn Block::new() -> Block {
   x: 0, 
   y: 20, 
   color: Color::new(), 
-  event_block : "None"
+  event_block : "None",
+  sprite_block : MoveSprite::new()
   }
 }
 
@@ -26,7 +28,7 @@ pub struct Ball {
 }
 
 pub fn Ball::new() -> Ball {
-  { width: 25, height: 25, x: 19, y: 100, color: Color::new() }
+  { width: 25, height: 25, x: 19, y: 93, color: Color::new() }
 }
 
 pub struct Game {
@@ -39,6 +41,7 @@ pub struct Game {
   mut delay : UInt
   mut counter : UInt
   mut counterFlag : Bool
+  mut pbar :Block
 }
 
 pub fn Game::new() -> Game {
@@ -50,8 +53,9 @@ pub fn Game::new() -> Game {
     coin: 0,
     time: 0,
     delay: 0,
-    counter: 65,
+    counter: 60,
     counterFlag: false,
+    pbar: Block::{width: 0, height: 10, x: 80, y: 140, color: Color::new(), event_block : "None", sprite_block : MoveSprite::new()} 
   }
 }
 
@@ -61,16 +65,18 @@ pub fn input(self : Game) -> Unit {
     game.counter -= 1
     animeBlock(self)
     animeBall(self)
+    animeSprite(self)
   }
   if game.counter == 0 {
     for i in [0, 1, 2] {
       self.block[i].changeColor_random()
       self.block[i].event_block = identifyEvent(getEvent())
+      
     @wasm4.trace("\{self.time}")
 
     }
 
-    game.counter = 65
+    game.counter = 60
     game.counterFlag = false
     game.ball.x = 19
     if game.block[0].color.palette == game.block[1].color.palette {
