@@ -8,6 +8,7 @@ pub fn update() -> Unit {
   game.time += 1
 
   runEvents()
+  animeProgressBar(game)
  
   if game.coin<=0 {
     gameOver()
