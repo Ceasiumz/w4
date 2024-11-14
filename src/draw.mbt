@@ -4,21 +4,24 @@ struct Position {
 }
 
 struct Color {
-  mut index : UInt
   mut palette : UInt
 }
 
 pub fn Color::new() -> Color {
-  { index: 1, palette: 2 }
+  { palette: 2 }
 }
 
 let randomer : @random.Rand = @random.Rand::new()
 
-pub fn Color::newRandom() -> Color {
-  { index: randomer.uint(), palette: 2 }
-}
-
 let inipos : Position = { x: 0, y: 0 }
+
+fn draw(self : Game) -> Unit {
+  drawBlock(self)
+  drawBall(self)
+  drawCoin(self)
+  drawUI()
+  drawProgressBar(self)
+}
 
 fn drawBlock(self : Game) -> Unit {
   for i in [0, 1, 2] {
@@ -32,75 +35,93 @@ fn drawBlock(self : Game) -> Unit {
       self.block[i].width,
       self.block[i].height,
     )
+    if game.counterFlag == false {
+      drawSprite(self, i)
+    }
+  }
+}
+
+fn drawSprite(self : Game, blockindex : Int) -> Unit {
+  @wasm4.set_draw_colors(1)
+  match self.block[blockindex].event_block {
+    "None" => return
+    "Sun" => {
+      self.block[blockindex].sprite_block = {
+        x: self.block[blockindex].x + 3,
+        y: 43,
+        sprite: sun_sprite,
+      }
+      @wasm4.blit(
+        self.block[blockindex].sprite_block.sprite,
+        self.block[blockindex].sprite_block.x,
+        self.block[blockindex].sprite_block.y,
+        SunWidth,
+        SunHeight,
+        { one_bit_per_pixel: true, flip_x: false, flip_y: false, rotate: false },
+      )
+    }
+    "Moon" => {
+      self.block[blockindex].sprite_block = {
+        x: self.block[blockindex].x + 3,
+        y: 43,
+        sprite: moon_sprite,
+      }
+      @wasm4.blit(
+        self.block[blockindex].sprite_block.sprite,
+        self.block[blockindex].sprite_block.x,
+        self.block[blockindex].sprite_block.y,
+        MoonWidth,
+        MoonHeight,
+        { one_bit_per_pixel: true, flip_x: false, flip_y: false, rotate: false },
+      )
+    }
+    _ => return
   }
 }
 
 fn drawBall(self : Game) -> Unit {
-  @wasm4.set_draw_colors(3)
-  @wasm4.oval(
-    self.ball.x,
-    self.ball.y,
-    self.ball.width,
-    self.ball.height,
-  )
+  if game.gameOverFlag == false {
+    @wasm4.set_draw_colors(3)
+    @wasm4.rect(31, 108, 100 , 5)
+    @wasm4.set_draw_colors(2)
+    @wasm4.oval(self.ball.x, self.ball.y, self.ball.width, self.ball.height)
+  }
+}
 
+fn drawProgressBar(self : Game) -> Unit {
+  @wasm4.set_draw_colors(2)
+  @wasm4.rect(self.pbar.x, self.pbar.y, self.pbar.width, self.pbar.height)
 }
 
 fn drawCoin(self : Game) -> Unit {
   @wasm4.set_draw_colors(2)
-  @wasm4.text(": \{self.coin}",50,130)
-  coin.blit(
-    40,
-    130,
+  @wasm4.text(":\{self.coin}", 74, 150)
+  coin_sprite.blit(
+    64,
+    150,
     8,
     8,
     { one_bit_per_pixel: false, flip_x: false, flip_y: false, rotate: false },
   )
 }
 
-//fn drawFrame(self : Game) -> Unit {
-//  @wasm4.
-//}
-
-fn none() -> Unit {
-
-  ///    if mousepos.x <= 80 {
-  ///        mousepos.x += 1;
-  ///    } else {
-  ///        mousepos.x = 0;
-  ///    }
-  ///    if mousepos.y <= 80 {
-  ///        mousepos.y += 1;
-  ///    } else {
-  ///        mousepos.y = 0;
-  ///    }
-  if @wasm4.get_gamepad(index=1).button_right && inipos.x < 80 {
-    inipos.x += 1
-  }
-  if @wasm4.get_gamepad(index=1).button_left && inipos.x > 0 {
-    inipos.x -= 1
-  }
-  if @wasm4.get_gamepad(index=1).button_down && inipos.y < 80 {
-    inipos.y += 1
-  }
-  if @wasm4.get_gamepad(index=1).button_up && inipos.y > 0 {
-    inipos.y -= 1
-  }
-  if @wasm4.get_gamepad(index=1).button_1 {
-    noice()
-  }
+fn drawUI() -> Unit {
+  @wasm4.text("G a c h a", 44, 6)
+  @wasm4.text(
+    "Generator:\{(event.sunAmount-event.moonAmount).reinterpret_as_int()}",
+    32,
+    127,
+  )
 }
 
 pub fn changeColor(self : Block) -> Unit {
   if self.color.palette < 4 {
     self.color.palette += 1
-  } else {    
+  } else {
     self.color.palette = 1
   }
 }
 
 pub fn changeColor_random(self : Block) -> Unit {
-  if self.color.palette < 4 {
-  self.color.palette = randomer.uint(limit=3)+1
-  }
+  self.color.palette = randomer.uint(limit=3) + 2
 }

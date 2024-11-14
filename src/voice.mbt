@@ -1,23 +1,12 @@
-pub fn noice() -> Unit {
-  game.coin +=0
+pub fn prize() -> Unit {
+  game.coin +=10
   @wasm4.tone_note_mode(
     (@wasm4.Note::new(60, bend=10), None),
     @wasm4.ADSR::new(60),
     @wasm4.ADSRVolume::new(100),
     @wasm4.ToneFlag::new(),
   )
-  @wasm4.trace("noice")
-}
-
-pub fn winwin() -> Unit {
-  game.coin +=20
-  @wasm4.tone_note_mode(
-    (@wasm4.Note::new(60, bend=10), None),
-    @wasm4.ADSR::new(60),
-    @wasm4.ADSRVolume::new(100),
-    @wasm4.ToneFlag::new(),
-  )
-  @wasm4.trace("winwin")
+  @wasm4.trace("prize")
 }
 
 pub fn nothing() -> Unit {
