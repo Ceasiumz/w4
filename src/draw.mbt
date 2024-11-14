@@ -1,7 +1,3 @@
-struct Position {
-  mut x : Int
-  mut y : Int
-}
 
 struct Color {
   mut palette : UInt
@@ -12,8 +8,6 @@ pub fn Color::new() -> Color {
 }
 
 let randomer : @random.Rand = @random.Rand::new()
-
-let inipos : Position = { x: 0, y: 0 }
 
 fn draw(self : Game) -> Unit {
   drawBlock(self)
